@@ -1500,10 +1500,10 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
                 Logging.info("cannot get call state, will play audio over any telephone calls: " + ex);
             }
         }
+        // FieldScan: TTS prompt disabled
         if (MainActivity.getMainActivity() != null &&
-                MainActivity.getMainActivity().state != null &&
-                !MainActivity.getMainActivity().state.ttsChecked) {
-            ttsCheckIntent();
+                MainActivity.getMainActivity().state != null) {
+            MainActivity.getMainActivity().state.ttsChecked = true;
         }
     }
 

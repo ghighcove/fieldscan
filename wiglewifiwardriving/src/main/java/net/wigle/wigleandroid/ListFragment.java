@@ -820,20 +820,11 @@ public final class ListFragment extends Fragment implements ApiListener, DialogL
             }
 
             button.setOnClickListener(view1 -> {
-                final MainActivity main = MainActivity.getMainActivity(ListFragment.this);
-                if (main == null) {
-                    return;
-                }
-                final FragmentActivity a = getActivity();
-                if (null != a) {
-                    final boolean userConfirmed = prefs.getBoolean(PreferenceKeys.PREF_CONFIRM_UPLOAD_USER, false);
-                    final State state = MainActivity.getStaticState();
-
-                    if (userConfirmed && null != state) {
-                        uploadFile();
-                    } else {
-                        makeUploadDialog(main);
-                    }
+                // FieldScan: sync to PC
+                final android.content.Context ctx = getContext();
+                if (ctx != null) {
+                    android.widget.Toast.makeText(ctx, "Syncing to PC…", android.widget.Toast.LENGTH_SHORT).show();
+                    AutoSyncManager.manualSync(ctx);
                 }
             });
         }

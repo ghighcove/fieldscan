@@ -72,6 +72,7 @@ import net.wigle.wigleandroid.util.FileUtility;
 import net.wigle.wigleandroid.util.Logging;
 import net.wigle.wigleandroid.util.PreferenceKeys;
 import net.wigle.wigleandroid.util.SettingsUtil;
+import net.wigle.wigleandroid.AutoSyncManager;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -666,6 +667,50 @@ public final class SettingsFragment extends Fragment implements DialogListener {
             } catch (PackageManager.NameNotFoundException e) {
                 Logging.error("Unable to get version number: ",e);
             }
+        }
+
+        // FieldScan AutoSync settings
+        setupFieldScanSyncSettings(view, prefs, editor);
+    }
+
+    private void setupFieldScanSyncSettings(final View view, final SharedPreferences prefs, final Editor editor) {
+        final android.widget.CheckBox autoSync = view.findViewById(R.id.fieldscan_auto_sync);
+        if (autoSync != null) {
+            autoSync.setChecked(prefs.getBoolean(AutoSyncManager.PREF_AUTO_SYNC, true));
+            autoSync.setOnCheckedChangeListener((b, checked) ->
+                    editor.putBoolean(AutoSyncManager.PREF_AUTO_SYNC, checked).apply());
+        }
+
+        final android.widget.EditText ssidEdit = view.findViewById(R.id.fieldscan_home_ssid);
+        if (ssidEdit != null) {
+            ssidEdit.setText(prefs.getString(AutoSyncManager.PREF_HOME_SSID, ""));
+            ssidEdit.setOnFocusChangeListener((v, hasFocus) -> {
+                if (!hasFocus)
+                    editor.putString(AutoSyncManager.PREF_HOME_SSID, ssidEdit.getText().toString().trim()).apply();
+            });
+        }
+
+        final android.widget.EditText ipEdit = view.findViewById(R.id.fieldscan_server_ip);
+        if (ipEdit != null) {
+            ipEdit.setText(prefs.getString(AutoSyncManager.PREF_SERVER_IP, ""));
+            ipEdit.setOnFocusChangeListener((v, hasFocus) -> {
+                if (!hasFocus)
+                    editor.putString(AutoSyncManager.PREF_SERVER_IP, ipEdit.getText().toString().trim()).apply();
+            });
+        }
+
+        final android.widget.EditText portEdit = view.findViewById(R.id.fieldscan_server_port);
+        if (portEdit != null) {
+            final int savedPort = prefs.getInt(AutoSyncManager.PREF_SERVER_PORT, 8765);
+            portEdit.setText(String.valueOf(savedPort));
+            portEdit.setOnFocusChangeListener((v, hasFocus) -> {
+                if (!hasFocus) {
+                    try {
+                        editor.putInt(AutoSyncManager.PREF_SERVER_PORT,
+                                Integer.parseInt(portEdit.getText().toString().trim())).apply();
+                    } catch (NumberFormatException ignored) {}
+                }
+            });
         }
     }
 

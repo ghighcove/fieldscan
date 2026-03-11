@@ -546,6 +546,57 @@
     android:layout_height="0dip"
     android:text="@string/speech_button" android:layout_weight="1"
     android:paddingTop="10dip" android:paddingBottom="10dip"/>
+
+    <!-- FieldScan Auto-Sync Settings -->
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fieldscan_sync_header"
+        android:textSize="14sp"
+        android:textColor="#00BCD4"
+        android:paddingTop="12dip"
+        android:paddingBottom="4dip"
+        android:paddingLeft="4dip" />
+    <CheckBox android:id="@+id/fieldscan_auto_sync"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fieldscan_auto_sync_title" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fieldscan_home_ssid_title"
+        android:paddingTop="6dip"
+        android:paddingLeft="4dip" />
+    <EditText android:id="@+id/fieldscan_home_ssid"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Home WiFi SSID"
+        android:inputType="text"
+        android:singleLine="true" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fieldscan_server_ip_title"
+        android:paddingTop="6dip"
+        android:paddingLeft="4dip" />
+    <EditText android:id="@+id/fieldscan_server_ip"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="192.168.1.x"
+        android:inputType="textNoSuggestions"
+        android:singleLine="true" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fieldscan_server_port_title"
+        android:paddingTop="6dip"
+        android:paddingLeft="4dip" />
+    <EditText android:id="@+id/fieldscan_server_port"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="8765"
+        android:inputType="number"
+        android:singleLine="true" />
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"

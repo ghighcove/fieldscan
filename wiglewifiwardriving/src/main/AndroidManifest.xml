@@ -386,6 +386,15 @@
         <!-- https://android-developers.googleblog.com/2017/03/update-your-app-to-take-advantage-of.html -->
         <meta-data android:name="android.max_aspect" android:value="2.1" />
 
+        <!-- FieldScan AutoSync receiver -->
+        <receiver
+            android:name=".AutoSyncManager"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

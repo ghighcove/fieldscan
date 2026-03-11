@@ -12,7 +12,7 @@
     <string name="network_activity_name">WiGLE WiFi – Network</string>
     <string name="data_activity_name">WiGLE WiFi – Database</string>
     <string name="dbresult_activity_name">WiGLE WiFi – Search Result</string>
-    <string name="upload_button">Upload to\nWiGLE.net</string>
+    <string name="upload_button">Sync\nto PC</string>
     <string name="username">WiGLE username</string>
     <string name="password">WiGLE password</string>
     <string name="show_current">Show current networks only</string>
@@ -484,4 +484,10 @@
     <string name="foss_map_base_url">Map vector tile server style URL base</string>
     <string name="foss_map_key">Map vector base key</string>
     <string name="check_credentials">Verify</string>
+    <!-- FieldScan AutoSync settings -->
+    <string name="fieldscan_sync_header">Auto-Sync to PC</string>
+    <string name="fieldscan_home_ssid_title">Home WiFi SSID</string>
+    <string name="fieldscan_server_ip_title">PC Receiver IP</string>
+    <string name="fieldscan_server_port_title">Receiver Port (default 8765)</string>
+    <string name="fieldscan_auto_sync_title">Auto-Sync Enabled</string>
 </resources>
