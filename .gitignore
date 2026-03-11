@@ -30,3 +30,5 @@ local.properties
 .DS_Store
 .settings
 *.db
+# FieldScan session files — private
+tasks/
