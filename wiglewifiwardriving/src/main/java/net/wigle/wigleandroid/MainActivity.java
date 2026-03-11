@@ -1191,11 +1191,10 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
             config.setLocale(newLocale);
             Logging.info("setting locale: " + newLocale);
             context.getResources().updateConfiguration(config, context.getResources().getDisplayMetrics());
-            //ALIBI: loop protection
+            // FieldScan: TTS prompt disabled
             if (MainActivity.getMainActivity() != null &&
-                    MainActivity.getMainActivity().state != null &&
-                    !MainActivity.getMainActivity().state.ttsChecked) {
-                ttsCheckIntent();
+                    MainActivity.getMainActivity().state != null) {
+                MainActivity.getMainActivity().state.ttsChecked = true;
             }
         }
     }

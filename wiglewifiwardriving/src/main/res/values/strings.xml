@@ -2,11 +2,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="empty"></string>
     <string name="stats">Starting</string>
-    <string name="app_name">WiGLE WiFi Wardriving FOSS</string>
-    <string name="list_app_name">WiGLE WiFi FOSS</string>
-    <string name="settings_app_name">WiGLE WiFi – Settings</string>
-    <string name="mapping_app_name">WiGLE – Map</string>
-    <string name="dashboard_app_name">WiGLE WiFi – Dashboard</string>
+    <string name="app_name">FieldScan</string>
+    <string name="list_app_name">FieldScan</string>
+    <string name="settings_app_name">FieldScan – Settings</string>
+    <string name="mapping_app_name">FieldScan – Map</string>
+    <string name="dashboard_app_name">FieldScan – Dashboard</string>
     <string name="error_report_name">Most Recent Error Report</string>
     <string name="speech_name">WiGLE WiFi – Speech Settings</string>
     <string name="network_activity_name">WiGLE WiFi – Network</string>

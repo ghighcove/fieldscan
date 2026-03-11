@@ -8,7 +8,7 @@ android {
     namespace "net.wigle.wigleandroid"
     compileSdk = 36
     defaultConfig {
-        applicationId "net.wigle.wigleandroid.foss"
+        applicationId "com.fieldscan.app"
         minSdkVersion 24
         targetSdkVersion 36
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
