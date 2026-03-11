@@ -80,7 +80,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.gson.Gson;
 
 import net.wigle.wigleandroid.background.BssidMatchingAudioThread;
-import net.wigle.wigleandroid.background.ObservationUploader;
 import net.wigle.wigleandroid.db.DBException;
 import net.wigle.wigleandroid.db.DatabaseHelper;
 import net.wigle.wigleandroid.db.MxcDatabaseHelper;
@@ -166,7 +165,6 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
         boolean ttsChecked = false;
         boolean inEmulator;
         PhoneState phoneState;
-        ObservationUploader observationUploader;
         SetNetworkListAdapter listAdapter;
         String previousStatus;
         int currentTab = R.id.nav_list;
@@ -224,7 +222,6 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
     private static final long DESTROY_FINISH_MILLIS = 3000L; // if someone force kills, how long until service finishes
 
     public static final String ACTION_END = "net.wigle.wigleandroid.END";
-    public static final String ACTION_UPLOAD = "net.wigle.wigleandroid.UPLOAD";
     public static final String ACTION_PAUSE = "net.wigle.wigleandroid.PAUSE";
     public static final String ACTION_SCAN = "net.wigle.wigleandroid.SCAN";
 
@@ -363,9 +360,6 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
             }
             if (state.wifiReceiver != null) {
                 state.wifiReceiver.setMainActivity(this);
-            }
-            if (state.observationUploader != null) {
-                state.observationUploader.setContext(this);
             }
         } else {
             Logging.info("MAIN: creating new state");
@@ -810,7 +804,6 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
         fragmentTitles.put(R.id.nav_news, getString(R.string.news_app_name));
         fragmentTitles.put(R.id.nav_rank, getString(R.string.rank_stats_app_name));
         fragmentTitles.put(R.id.nav_stats, getString(R.string.tab_stats));
-        fragmentTitles.put(R.id.nav_uploads, getString(R.string.uploads_app_name));
         fragmentTitles.put(R.id.nav_settings, getString(R.string.settings_app_name));
         fragmentTitles.put(R.id.nav_exit, getString(R.string.menu_exit));
         //fragmentTitles.put(R.id.nav_, getString(R.string.site_stats_app_name));
@@ -908,8 +901,6 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
             return SiteStatsFragment.class;
         } else if (navId == R.id.nav_news) {
             return NewsFragment.class;
-        } else if (navId == R.id.nav_uploads) {
-            return UploadsFragment.class;
         } else if (navId == R.id.nav_settings) {
             return SettingsFragment.class;
         } else {
@@ -2425,7 +2416,6 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
         Logging.info("transfer complete");
         // start a scan to get the ball rolling again if this is non-stop mode
         scheduleScan();
-        state.observationUploader = null;
     }
 
     public void setLocationUI() {
@@ -2552,12 +2542,6 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
                 Logging.info("MAIN: finish called twice!");
             }
 
-            // interrupt this just in case
-            final ObservationUploader observationUploader = state.observationUploader;
-            if (observationUploader != null) {
-                observationUploader.setInterrupted();
-            }
-
             if (state.GNSSListener != null) {
                 // save our location for later runs
                 state.GNSSListener.saveLocation();
@@ -2650,24 +2634,6 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
             }
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    /**
-     * pure-background upload method for intent-based uploads
-     */
-    public void backgroundUploadFile(){
-        Logging.info( "background upload file" );
-        final State state = getState();
-        setTransferring();
-        state.observationUploader = new ObservationUploader(this,
-                ListFragment.lameStatic.dbHelper,
-                (json, isCache) -> { transferComplete();},
-                false, false, false);
-        try {
-            state.observationUploader.startDownload(null);
-        } catch (WiGLEAuthException x) {
-            Logging.warn("Authentication failure on background run upload");
-        }
     }
 
     public void checkStorage() {

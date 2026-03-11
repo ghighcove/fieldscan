@@ -3,11 +3,14 @@
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:textColor">#AAAAAA</item>
         <item name="android:textColorPrimary">#AAAAAA</item>
-        <item name="android:colorBackground">#1A1A1A</item>
-        <item name="colorControlNormal">#AAAAAA</item>
-        <item name="colorNavigationItemSelected">#B0B0B0</item>
-        <item name="colorNavigationItem">#353535</item>
+        <item name="android:colorBackground">#121212</item>
+        <item name="colorPrimary">#121212</item>
+        <item name="colorAccent">#00BCD4</item>
+        <item name="colorControlNormal">#00BCD4</item>
+        <item name="colorNavigationItemSelected">#00BCD4</item>
+        <item name="colorNavigationItem">#1E1E1E</item>
         <item name="scrimBackground">#88000000</item>
+        <item name="android:forceDarkAllowed">true</item>
     </style>
     <style name="ChildActivityTheme" parent="AppTheme">
         <item name="android:colorBackground">#1A1A1A</item>

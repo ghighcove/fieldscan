@@ -49,6 +49,12 @@ public class NetworkIconGenerator {
     public static final int STYLE_CELL_NEW = 6;
     public static final int STYLE_BT_NEW = 7;
     public static final int STYLE_WIFI_NEW = 8;
+    // FieldScan crypto-aware styles
+    public static final int STYLE_WIFI_OPEN = 9;    // #00E676 bright green
+    public static final int STYLE_WIFI_WEP = 10;    // #FFEB3B yellow
+    public static final int STYLE_WIFI_WPA = 11;    // #FF7043 orange-red
+    public static final int STYLE_WIFI_WPA3 = 12;   // #F44336 red
+    public static final int STYLE_WIFI_UNKNOWN = 13; // #78909C blue-gray
 
 
     /**
@@ -76,7 +82,7 @@ public class NetworkIconGenerator {
             mTextView.setGravity(Gravity.CENTER_HORIZONTAL);
             mTextView.setCompoundDrawablePadding(mContext.getResources().getDimensionPixelSize(R.dimen.map_label_image_padding));
             mTextView.setCompoundDrawablesWithIntrinsicBounds(getIconId(network.getType(), network.getCrypto()), 0, 0, 0);
-            setStyle(styleForNetworkType(network.getType(), isNew));
+            setStyle(styleForNetworkType(network.getType(), network.getCrypto(), isNew));
         }
         return this.makeIcon();
     }
@@ -198,6 +204,17 @@ public class NetworkIconGenerator {
                 return -871288064; //CC113300
             case STYLE_WIFI_NEW:
                 return -870165248; //CC225500
+            // FieldScan crypto-aware colors (CC alpha prefix for ~80% opacity)
+            case STYLE_WIFI_OPEN:
+                return 0xCC00E676; // bright green — open network
+            case STYLE_WIFI_WEP:
+                return 0xCCFFEB3B; // yellow — WEP
+            case STYLE_WIFI_WPA:
+                return 0xCCFF7043; // orange-red — WPA/WPA2
+            case STYLE_WIFI_WPA3:
+                return 0xCCF44336; // red — WPA3
+            case STYLE_WIFI_UNKNOWN:
+                return 0xCC78909C; // blue-gray — unknown
             case STYLE_DEFAULT:
             case STYLE_WHITE:
             default:
@@ -253,7 +270,7 @@ public class NetworkIconGenerator {
         }
     }
 
-    private int styleForNetworkType(NetworkType t, final boolean isNew) {
+    private int styleForNetworkType(NetworkType t, int crypto, final boolean isNew) {
         switch (t) {
             case BT:
             case BLE:
@@ -271,10 +288,20 @@ public class NetworkIconGenerator {
                 }
                 return STYLE_CELL;
             case WIFI:
-                if (isNew) {
-                    return STYLE_WIFI_NEW;
+                // FieldScan: color by security type
+                switch (crypto) {
+                    case Network.CRYPTO_NONE:
+                        return STYLE_WIFI_OPEN;
+                    case Network.CRYPTO_WEP:
+                        return STYLE_WIFI_WEP;
+                    case Network.CRYPTO_WPA:
+                    case Network.CRYPTO_WPA2:
+                        return STYLE_WIFI_WPA;
+                    case Network.CRYPTO_WPA3:
+                        return STYLE_WIFI_WPA3;
+                    default:
+                        return isNew ? STYLE_WIFI_NEW : STYLE_WIFI_UNKNOWN;
                 }
-                return STYLE_WIFI;
             default:
                 return STYLE_DEFAULT;
         }

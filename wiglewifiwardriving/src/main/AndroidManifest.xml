@@ -92,22 +92,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ActivateActivity"
-            android:label="@string/title_activity_activate"
-            android:exported="true"
-            android:parentActivityName=".MainActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
-            android:theme="@style/ChildActivityTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="net.wigle.wigleandroid.MainActivity" />
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="net.wigle.wigleandroid" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".ErrorReportActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
             android:exported="false"
@@ -163,18 +147,6 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name=".RegistrationActivity"
-            android:parentActivityName=".MainActivity"
-            android:exported="true"
-            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
-            android:theme="@style/ChildActivityTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="net.wigle.wigleandroid.register" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".FilterActivity"
@@ -338,13 +310,6 @@
                 <action android:name="net.wigle.wigleandroid.END" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".listener.UploadReceiver"
-            android:exported="true"
-            tools:ignore="ExportedReceiver">
-            <intent-filter>
-                <action android:name="net.wigle.wigleandroid.UPLOAD" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".listener.ScanControlReceiver"
             android:exported="true"
             tools:ignore="ExportedReceiver">
@@ -399,6 +364,15 @@
 
         <!-- https://android-developers.googleblog.com/2017/03/update-your-app-to-take-advantage-of.html -->
         <meta-data android:name="android.max_aspect" android:value="2.1" />
+
+        <!-- FieldScan AutoSync receiver -->
+        <receiver
+            android:name=".AutoSyncManager"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

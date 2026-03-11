@@ -51,9 +51,6 @@ public final class WigleService extends Service {
     private final IBinder wigleServiceBinder = new WigleServiceBinder(this);
     private final NumberFormat countFormat = NumberFormat.getIntegerInstance();
 
-    public static final String UPLOAD_COMPLETE_INTENT = "net.wigle.wigleandroid.UPLOAD_COMPLETE";
-    public static final String UPLOAD_FAILED_INTENT = "net.wigle.wigleandroid.UPLOAD_FAILED";
-    public static final String UPLOAD_INTENT = "net.wigle.wigleandroid.UPLOAD";
     public static final String PAUSE_INTENT = "net.wigle.wigleandroid.PAUSE";
     public static final String SCAN_INTENT = "net.wigle.wigleandroid.SCAN";
 
@@ -258,10 +255,6 @@ public final class WigleService extends Service {
                     scanSharedIntent.setClass(getApplicationContext(), net.wigle.wigleandroid.listener.ScanControlReceiver.class);
                     final PendingIntent scanIntent = PendingIntent.getBroadcast(MainActivity.getMainActivity(), 0, scanSharedIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
 
-                    final Intent uploadSharedIntent = new Intent();
-                    uploadSharedIntent.setAction(UPLOAD_INTENT);
-                    uploadSharedIntent.setClass(getApplicationContext(), net.wigle.wigleandroid.listener.UploadReceiver.class);
-                    final PendingIntent uploadIntent = PendingIntent.getBroadcast(MainActivity.getMainActivity(), 0, uploadSharedIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_CANCEL_CURRENT);
                     if (SDK_INT >= 31) {
                         notification = getNotification31(title, context, text,
                                 ListFragment.lameStatic.newWifi, ListFragment.lameStatic.runNets,
@@ -269,14 +262,14 @@ public final class WigleService extends Service {
                                 ListFragment.lameStatic.newBt, ListFragment.lameStatic.runBt,
                                 distString, distStringShort, dbNets,
                                 MainActivity.isScanning(context)?context.getString(R.string.list_scanning_on):context.getString(R.string.list_scanning_off),
-                                when, contentIntent, pauseIntent, scanIntent, uploadIntent);
+                                when, contentIntent, pauseIntent, scanIntent);
                     } else if (SDK_INT >= Build.VERSION_CODES.O) {
                         notification = getNotification26(title, context, text, ListFragment.lameStatic.newWifi,
                                 ListFragment.lameStatic.newCells, ListFragment.lameStatic.newBt,
                                 distStringShort, when, contentIntent, pauseIntent,
-                                scanIntent, uploadIntent);
+                                scanIntent);
                     } else {
-                        notification = getNotification16(title, context, text, when, contentIntent, pauseIntent, scanIntent, uploadIntent);
+                        notification = getNotification16(title, context, text, when, contentIntent, pauseIntent, scanIntent);
                     }
                 }
 
@@ -317,8 +310,7 @@ public final class WigleService extends Service {
     private Notification getNotification16(final String title, final Context context, final String text, final long when,
                                             final PendingIntent contentIntent,
                                             final PendingIntent pauseIntent,
-                                            final PendingIntent scanIntent,
-                                            final PendingIntent uploadIntent) {
+                                            final PendingIntent scanIntent) {
         @SuppressWarnings("deprecation") final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context);
         builder.setContentIntent(contentIntent);
@@ -335,7 +327,6 @@ public final class WigleService extends Service {
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         builder.addAction(android.R.drawable.ic_media_pause, "Pause", pauseIntent);
         builder.addAction(android.R.drawable.ic_media_play, "Scan", scanIntent);
-        builder.addAction(android.R.drawable.ic_menu_upload, "Upload", uploadIntent);
 
         try {
             //ALIBI: https://stackoverflow.com/questions/43123466/java-lang-nullpointerexception-attempt-to-invoke-interface-method-java-util-it
@@ -353,8 +344,7 @@ public final class WigleService extends Service {
                                            final long newCell,
                                            final long newBt, final String distStringShort,
                                            final long when, final PendingIntent contentIntent,
-                                           final PendingIntent pauseIntent, final PendingIntent scanIntent,
-                                           final PendingIntent uploadIntent) {
+                                           final PendingIntent pauseIntent, final PendingIntent scanIntent) {
         // new notification channel
         if (SDK_INT >= Build.VERSION_CODES.O) {
             final NotificationManager notificationManager =
@@ -404,12 +394,6 @@ public final class WigleService extends Service {
                         .build();
                 builder.addAction(scanAction);
             }
-            Notification.Action ulAction = new Notification.Action.Builder(
-                    Icon.createWithResource(this, android.R.drawable.ic_menu_upload),
-                    "Upload", uploadIntent)
-                    .build();
-            builder.addAction(ulAction);
-
             return builder.build();
         }
         return null;
@@ -423,8 +407,7 @@ public final class WigleService extends Service {
                                            final String distString, final String distStringShort,
                                            final long dbNets, final String status,
                                            final long when, final PendingIntent contentIntent,
-                                           final PendingIntent pauseIntent, final PendingIntent scanIntent,
-                                           final PendingIntent uploadIntent) {
+                                           final PendingIntent pauseIntent, final PendingIntent scanIntent) {
         final NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
@@ -484,12 +467,6 @@ public final class WigleService extends Service {
                     .build();
             builder.addAction(scanAction);
         }
-        Notification.Action ulAction = new Notification.Action.Builder(
-                Icon.createWithResource(this, android.R.drawable.ic_menu_upload),
-                "Upload", uploadIntent)
-                .build();
-        builder.addAction(ulAction);
-
         return builder.build();
     }
 

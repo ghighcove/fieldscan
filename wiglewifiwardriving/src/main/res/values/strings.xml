@@ -2,16 +2,26 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="empty"></string>
     <string name="stats">Starting</string>
-    <string name="app_name">WiGLE WiFi Wardriving</string>
-    <string name="list_app_name">WiGLE WiFi</string>
-    <string name="settings_app_name">WiGLE WiFi – Settings</string>
-    <string name="mapping_app_name">WiGLE – Map</string>
-    <string name="dashboard_app_name">WiGLE WiFi – Dashboard</string>
+    <string name="app_name">FieldScan</string>
+    <string name="list_app_name">FieldScan</string>
+    <string name="settings_app_name">FieldScan – Settings</string>
+    <string name="mapping_app_name">FieldScan – Map</string>
+    <string name="dashboard_app_name">FieldScan – Dashboard</string>
     <string name="error_report_name">Most Recent Error Report</string>
-    <string name="speech_name">WiGLE WiFi – Speech Settings</string>
-    <string name="network_activity_name">WiGLE WiFi – Network</string>
-    <string name="data_activity_name">WiGLE WiFi – Database</string>
-    <string name="dbresult_activity_name">WiGLE WiFi – Search Result</string>
+    <string name="speech_name">FieldScan – Speech Settings</string>
+    <string name="network_activity_name">FieldScan – Network</string>
+    <string name="data_activity_name">FieldScan – Database</string>
+    <string name="dbresult_activity_name">FieldScan – Search Result</string>
+    <!-- FieldScan AutoSync settings -->
+    <string name="fieldscan_sync_header">Auto-Sync to PC</string>
+    <string name="fieldscan_home_ssid_title">Home WiFi SSID</string>
+    <string name="fieldscan_home_ssid_summary">SSID of your home network (trigger for sync)</string>
+    <string name="fieldscan_server_ip_title">PC Receiver IP</string>
+    <string name="fieldscan_server_ip_summary">IP address of PC running receiver.py</string>
+    <string name="fieldscan_server_port_title">Receiver Port</string>
+    <string name="fieldscan_server_port_summary">Default: 8765</string>
+    <string name="fieldscan_auto_sync_title">Auto-Sync Enabled</string>
+    <string name="fieldscan_auto_sync_summary">Upload CSV files to PC when home WiFi connects</string>
     <string name="upload_button">Upload to\nWiGLE.net</string>
     <string name="username">WiGLE username</string>
     <string name="password">WiGLE password</string>
