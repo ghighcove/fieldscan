@@ -338,6 +338,11 @@
     <string name="status_parsing">Parsing</string>
     <string name="filter_app_name">Filter Network List</string>
     <string name="mapfilter_app_name">Filter Map</string>
+    <!-- TD-13 heatmap -->
+    <string name="heatmap_toggle">Toggle signal heatmap</string>
+    <!-- TD-20 quick filters -->
+    <string name="filter_open_only">Open only</string>
+    <string name="filter_new_session">New this session</string>
     <string name="map_data_head">Map Device Data</string>
     <string name="map_tile_head">Map Overlay Settings</string>
     <string name="settings_ident_head">Identity Settings</string>

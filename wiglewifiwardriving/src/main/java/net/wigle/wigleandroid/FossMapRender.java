@@ -714,4 +714,36 @@ public class FossMapRender {
             }
         }
     };
+
+    // TD-13 -----------------------------------------------------------------------
+
+    /**
+     * Build a GeoJSON FeatureCollection from the network cache for the heatmap layer.
+     * Each feature carries an "rssi_weight" property: a 0–1 float where 1 = strong (-50 dBm),
+     * 0 = weak (-100 dBm). Networks outside that range are clamped.
+     *
+     * Call this on a background thread and push the result to the GeoJsonSource on the main thread.
+     */
+    @NonNull
+    public FeatureCollection buildHeatmapGeoJson() {
+        final Collection<Network> nets = MainActivity.getNetworkCache().values();
+        final List<Feature> features = new ArrayList<>(nets.size());
+        for (final Network network : nets) {
+            if (!okForMapTab(network)) {
+                continue;
+            }
+            final net.wigle.wigleandroid.model.LatLng pos = network.getLatLng();
+            if (pos == null) {
+                continue;
+            }
+            // Normalise RSSI: -100 dBm → 0.0, -50 dBm → 1.0, clamped
+            final int rssi = network.getLevel();
+            final float weight = Math.max(0f, Math.min(1f, (rssi + 100f) / 50f));
+            final Feature f = Feature.fromGeometry(
+                    Point.fromLngLat(pos.longitude, pos.latitude));
+            f.addNumberProperty("rssi_weight", weight);
+            features.add(f);
+        }
+        return FeatureCollection.fromFeatures(features);
+    }
 }

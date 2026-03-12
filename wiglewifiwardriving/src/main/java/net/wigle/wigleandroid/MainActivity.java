@@ -284,6 +284,10 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
         migratePrefsIfNeeded();
         final SharedPreferences prefs = getSharedPreferences(PreferenceKeys.SHARED_PREFS, Context.MODE_PRIVATE);
 
+        // TD-20: stamp session start so "new this session" filter can compare constructionTime
+        prefs.edit().putLong(PreferenceKeys.PREF_MAP_SESSION_START_MS,
+                System.currentTimeMillis()).apply();
+
         ThemeUtil.setTheme(prefs);
         ThemeUtil.setNavTheme(this.getWindow(), this, prefs);
         mainActivity = this;

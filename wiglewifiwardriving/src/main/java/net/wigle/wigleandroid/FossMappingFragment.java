@@ -15,12 +15,14 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.goebl.simplify.PointExtractor;
 import com.goebl.simplify.Simplify;
+import com.google.android.material.chip.Chip;
 
 import net.wigle.wigleandroid.model.LatLng;
 import net.wigle.wigleandroid.model.Network;
@@ -42,11 +44,15 @@ import org.maplibre.android.location.modes.CameraMode;
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
+import org.maplibre.android.style.expressions.Expression;
+import org.maplibre.android.style.layers.HeatmapLayer;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.RasterLayer;
 import org.maplibre.android.style.layers.Property;
 import org.maplibre.android.style.layers.PropertyFactory;
+import org.maplibre.android.style.sources.GeoJsonSource;
 import org.maplibre.android.style.sources.RasterSource;
+import org.maplibre.geojson.FeatureCollection;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,11 +60,19 @@ import java.util.List;
 public class FossMappingFragment extends AbstractMappingFragment {
 
     private static final float ZOOM_MODIFIER = 1; //ALIBI: Google maps and MapLibe have an off-by-one zoom difference
+
+    // TD-13: heatmap layer ids
+    private static final String HEATMAP_SOURCE_ID = "fieldscan-heatmap-source";
+    private static final String HEATMAP_LAYER_ID  = "fieldscan-heatmap-layer";
+
     private MapView mapView;
 
     private FossMapRender mapRender;
 
     private Polyline routePolyline;
+
+    // TD-13: heatmap toggle state
+    private boolean heatmapVisible = false;
 
     private final Handler timer = new Handler();
 
@@ -104,6 +118,8 @@ public class FossMappingFragment extends AbstractMappingFragment {
         final SharedPreferences prefs = (a != null) ? a.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0) : null;
         final boolean visualizeRoute = prefs != null && prefs.getBoolean(PreferenceKeys.PREF_VISUALIZE_ROUTE, false);
 
+        // TD-20: session-start timestamp is set by MainActivity.onCreate; nothing to do here.
+
         mapView.getMapAsync(mapLibreMap -> {
             final String mapServerKey = prefs != null ?
                     prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_KEY, null) : null;
@@ -127,11 +143,14 @@ public class FossMappingFragment extends AbstractMappingFragment {
                 setupLocationTracking(mapLibreMap, prefs, style);
                 setupCameraListeners(mapLibreMap, prefs, style);
                 setupTileOverlay(mapLibreMap, prefs, style);
+                setupHeatmapLayer(style);          // TD-13
                 setupRouteVisualization(mapLibreMap, prefs, visualizeRoute);
                 initializeCameraPosition(mapLibreMap, oldCenter, oldZoom, prefs);
             });
         });
         setupCenterLocationButton(view);
+        setupHeatmapToggleButton(view);    // TD-13
+        setupFilterChips(view, prefs);     // TD-20
     }
 
     private void configureMapSettings(final MapLibreMap map,
@@ -258,6 +277,211 @@ public class FossMappingFragment extends AbstractMappingFragment {
             });
         });
     }
+
+    // -----------------------------------------------------------------------
+    // TD-13: Heatmap layer setup + toggle
+    // -----------------------------------------------------------------------
+
+    /**
+     * Adds a GeoJsonSource + HeatmapLayer pair to the map style.
+     * The source starts empty; {@link #refreshHeatmap()} populates it.
+     * The layer is hidden by default until the user toggles it.
+     */
+    private void setupHeatmapLayer(final Style style) {
+        try {
+            // Empty source — will be populated on demand
+            final GeoJsonSource heatmapSource = new GeoJsonSource(HEATMAP_SOURCE_ID);
+            if (style.getSource(HEATMAP_SOURCE_ID) != null) {
+                style.removeSource(HEATMAP_SOURCE_ID);
+            }
+            style.addSource(heatmapSource);
+
+            final HeatmapLayer heatmapLayer = new HeatmapLayer(HEATMAP_LAYER_ID, HEATMAP_SOURCE_ID);
+            heatmapLayer.setProperties(
+                    // Weight each point by rssi_weight property (0=weak/blue, 1=strong/red)
+                    PropertyFactory.heatmapWeight(
+                            Expression.interpolate(
+                                    Expression.linear(),
+                                    Expression.get("rssi_weight"),
+                                    Expression.stop(0f, 0f),
+                                    Expression.stop(1f, 1f)
+                            )
+                    ),
+                    // Intensity grows with zoom
+                    PropertyFactory.heatmapIntensity(
+                            Expression.interpolate(
+                                    Expression.linear(),
+                                    Expression.zoom(),
+                                    Expression.stop(0, 1f),
+                                    Expression.stop(18, 3f)
+                            )
+                    ),
+                    // Gradient: blue (weak) → cyan → yellow → red (strong)
+                    PropertyFactory.heatmapColor(
+                            Expression.interpolate(
+                                    Expression.linear(),
+                                    Expression.heatmapDensity(),
+                                    Expression.stop(0.0, Expression.rgba(0,   0,   255, 0)),
+                                    Expression.stop(0.2, Expression.rgba(0,   200, 255, 180)),
+                                    Expression.stop(0.5, Expression.rgba(50,  255, 50,  200)),
+                                    Expression.stop(0.8, Expression.rgba(255, 200, 0,   220)),
+                                    Expression.stop(1.0, Expression.rgba(255, 0,   0,   255))
+                            )
+                    ),
+                    // Radius grows with zoom
+                    PropertyFactory.heatmapRadius(
+                            Expression.interpolate(
+                                    Expression.linear(),
+                                    Expression.zoom(),
+                                    Expression.stop(0,  8f),
+                                    Expression.stop(15, 20f)
+                            )
+                    ),
+                    PropertyFactory.heatmapOpacity(0.85f),
+                    // Hidden by default
+                    PropertyFactory.visibility(Property.NONE)
+            );
+
+            if (style.getLayer(HEATMAP_LAYER_ID) != null) {
+                style.removeLayer(HEATMAP_LAYER_ID);
+            }
+            // Insert heatmap at the top of whatever layers already exist
+            final List<Layer> existingLayers = style.getLayers();
+            if (!existingLayers.isEmpty()) {
+                style.addLayerAbove(heatmapLayer,
+                        existingLayers.get(existingLayers.size() - 1).getId());
+            } else {
+                style.addLayer(heatmapLayer);
+            }
+
+            Logging.info("FossMappingFragment: heatmap layer added");
+        } catch (Exception e) {
+            Logging.error("FossMappingFragment: failed to setup heatmap layer: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Re-builds the heatmap GeoJSON from the current network cache and pushes it to the
+     * GeoJsonSource. Runs the heavy work on a background thread.
+     */
+    private void refreshHeatmap() {
+        if (mapRender == null) {
+            return;
+        }
+        new Thread(() -> {
+            final FeatureCollection fc = mapRender.buildHeatmapGeoJson();
+            if (mapView != null && !finishing.get()) {
+                mapView.post(() -> mapView.getMapAsync(map -> {
+                    if (finishing.get()) {
+                        return;
+                    }
+                    final Style style = map.getStyle();
+                    if (style == null) {
+                        return;
+                    }
+                    final GeoJsonSource src = (GeoJsonSource) style.getSource(HEATMAP_SOURCE_ID);
+                    if (src != null) {
+                        src.setGeoJson(fc);
+                    }
+                }));
+            }
+        }, "heatmap-refresh").start();
+    }
+
+    /**
+     * Wires up the heatmap toggle button (TD-13).
+     */
+    private void setupHeatmapToggleButton(final View view) {
+        final ImageButton heatmapBtn = view.findViewById(R.id.heatmap_toggle_button);
+        if (heatmapBtn == null) {
+            return;
+        }
+        // Sync initial tint to match persisted state (visible = activated)
+        final Activity a = getActivity();
+        if (a != null) {
+            final SharedPreferences prefs = a.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0);
+            heatmapVisible = prefs.getBoolean(PreferenceKeys.PREF_MAP_HEATMAP, false);
+            heatmapBtn.setAlpha(heatmapVisible ? 1.0f : 0.5f);
+        }
+
+        heatmapBtn.setOnClickListener(v -> {
+            heatmapVisible = !heatmapVisible;
+            heatmapBtn.setAlpha(heatmapVisible ? 1.0f : 0.5f);
+
+            final Activity act = getActivity();
+            if (act != null) {
+                act.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0)
+                        .edit().putBoolean(PreferenceKeys.PREF_MAP_HEATMAP, heatmapVisible).apply();
+            }
+
+            mapView.getMapAsync(map -> {
+                if (finishing.get()) {
+                    return;
+                }
+                final Style style = map.getStyle();
+                if (style == null) {
+                    return;
+                }
+                final Layer layer = style.getLayer(HEATMAP_LAYER_ID);
+                if (layer != null) {
+                    layer.setProperties(PropertyFactory.visibility(
+                            heatmapVisible ? Property.VISIBLE : Property.NONE));
+                }
+                if (heatmapVisible) {
+                    refreshHeatmap();
+                }
+            });
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // TD-20: Quick-filter chips
+    // -----------------------------------------------------------------------
+
+    /**
+     * Wires up the "Open only" and "New this session" filter chips (TD-20).
+     * Each chip toggles its pref then triggers a full re-cluster so the marker set
+     * reflects the new filter immediately.
+     */
+    private void setupFilterChips(final View view, final SharedPreferences prefs) {
+        final Chip openChip = view.findViewById(R.id.chip_filter_open_only);
+        final Chip newChip  = view.findViewById(R.id.chip_filter_new_session);
+        if (openChip == null || newChip == null) {
+            return;
+        }
+
+        // Restore state from prefs
+        if (prefs != null) {
+            openChip.setChecked(prefs.getBoolean(PreferenceKeys.PREF_MAP_ONLY_OPEN, false));
+            newChip.setChecked(prefs.getBoolean(PreferenceKeys.PREF_MAP_ONLY_NEW_SESSION, false));
+        }
+
+        openChip.setOnCheckedChangeListener((chip, checked) -> {
+            if (prefs != null) {
+                prefs.edit().putBoolean(PreferenceKeys.PREF_MAP_ONLY_OPEN, checked).apply();
+            }
+            if (mapRender != null) {
+                mapRender.reCluster();
+            }
+            if (heatmapVisible) {
+                refreshHeatmap();
+            }
+        });
+
+        newChip.setOnCheckedChangeListener((chip, checked) -> {
+            if (prefs != null) {
+                prefs.edit().putBoolean(PreferenceKeys.PREF_MAP_ONLY_NEW_SESSION, checked).apply();
+            }
+            if (mapRender != null) {
+                mapRender.reCluster();
+            }
+            if (heatmapVisible) {
+                refreshHeatmap();
+            }
+        });
+    }
+
+    // -----------------------------------------------------------------------
 
     /**
      * Sets up the tile overlay for WiGLE network discovery tiles using RasterSource.
@@ -419,6 +643,10 @@ public class FossMappingFragment extends AbstractMappingFragment {
         if (mapRender != null) {
             Logging.info("Re-clustering map");
             mapRender.reCluster();
+        }
+        // TD-13: keep heatmap in sync with marker set when visible
+        if (heatmapVisible) {
+            refreshHeatmap();
         }
     }
 
