@@ -22,7 +22,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.goebl.simplify.PointExtractor;
 import com.goebl.simplify.Simplify;
-import com.google.android.material.chip.Chip;
+import android.widget.ToggleButton;
 
 import net.wigle.wigleandroid.model.LatLng;
 import net.wigle.wigleandroid.model.Network;
@@ -444,8 +444,8 @@ public class FossMappingFragment extends AbstractMappingFragment {
      * reflects the new filter immediately.
      */
     private void setupFilterChips(final View view, final SharedPreferences prefs) {
-        final Chip openChip = view.findViewById(R.id.chip_filter_open_only);
-        final Chip newChip  = view.findViewById(R.id.chip_filter_new_session);
+        final ToggleButton openChip = view.findViewById(R.id.chip_filter_open_only);
+        final ToggleButton newChip  = view.findViewById(R.id.chip_filter_new_session);
         if (openChip == null || newChip == null) {
             return;
         }
@@ -456,7 +456,7 @@ public class FossMappingFragment extends AbstractMappingFragment {
             newChip.setChecked(prefs.getBoolean(PreferenceKeys.PREF_MAP_ONLY_NEW_SESSION, false));
         }
 
-        openChip.setOnCheckedChangeListener((chip, checked) -> {
+        openChip.setOnCheckedChangeListener((btn, checked) -> {
             if (prefs != null) {
                 prefs.edit().putBoolean(PreferenceKeys.PREF_MAP_ONLY_OPEN, checked).apply();
             }
@@ -468,7 +468,7 @@ public class FossMappingFragment extends AbstractMappingFragment {
             }
         });
 
-        newChip.setOnCheckedChangeListener((chip, checked) -> {
+        newChip.setOnCheckedChangeListener((btn, checked) -> {
             if (prefs != null) {
                 prefs.edit().putBoolean(PreferenceKeys.PREF_MAP_ONLY_NEW_SESSION, checked).apply();
             }

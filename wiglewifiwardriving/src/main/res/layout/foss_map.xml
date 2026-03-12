@@ -208,27 +208,35 @@
             android:paddingStart="6dp"
             android:paddingEnd="6dp"
             android:gravity="center_vertical">
-            <!-- "Open only" toggle chip -->
-            <com.google.android.material.chip.Chip
+            <!-- "Open only" toggle filter -->
+            <ToggleButton
                 android:id="@+id/chip_filter_open_only"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="6dp"
                 android:text="@string/filter_open_only"
-                app:chipBackgroundColor="#AA333333"
+                android:textOn="@string/filter_open_only"
+                android:textOff="@string/filter_open_only"
+                android:textSize="12sp"
+                android:background="#AA333333"
                 android:textColor="#FFFFFFFF"
-                app:checkedIconTint="#FFFFFFFF"
-                style="@style/Widget.MaterialComponents.Chip.Filter" />
-            <!-- "New this session" toggle chip -->
-            <com.google.android.material.chip.Chip
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:checked="false" />
+            <!-- "New this session" toggle filter -->
+            <ToggleButton
                 android:id="@+id/chip_filter_new_session"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="32dp"
                 android:text="@string/filter_new_session"
-                app:chipBackgroundColor="#AA333333"
+                android:textOn="@string/filter_new_session"
+                android:textOff="@string/filter_new_session"
+                android:textSize="12sp"
+                android:background="#AA333333"
                 android:textColor="#FFFFFFFF"
-                app:checkedIconTint="#FFFFFFFF"
-                style="@style/Widget.MaterialComponents.Chip.Filter" />
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:checked="false" />
         </LinearLayout>
     </HorizontalScrollView>
 
