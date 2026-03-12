@@ -290,6 +290,19 @@
                     android:text="@string/end_survey"/>
             </RelativeLayout>
             <RelativeLayout
+                android:id="@+id/probe_row"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/survey"
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <Button
+                    android:id="@+id/probe_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Probe Network"/>
+            </RelativeLayout>
+            <RelativeLayout
                 android:id="@+id/cell_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

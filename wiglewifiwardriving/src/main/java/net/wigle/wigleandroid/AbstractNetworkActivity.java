@@ -1040,7 +1040,42 @@ public abstract class AbstractNetworkActivity extends ScreenChildActivity implem
                 }
             });
 
+            // Probe button — visible only for open WiFi networks
+            final View probeRow = findViewById(R.id.probe_row);
+            final Button probeButton = findViewById(R.id.probe_button);
+            if (probeRow != null && probeButton != null
+                    && NetworkType.WIFI.equals(network.getType())
+                    && network.getCrypto() == net.wigle.wigleandroid.model.Network.CRYPTO_NONE) {
+                probeRow.setVisibility(VISIBLE);
+                probeButton.setOnClickListener(v -> {
+                    probeButton.setEnabled(false);
+                    probeButton.setText("Probing…");
+                    ProbeManager.probe(getApplicationContext(), network.getSsid(), report -> {
+                        probeButton.setEnabled(true);
+                        probeButton.setText("Probe Network");
+                        showProbeReport(report);
+                    });
+                });
+            }
+
         }
+    }
+
+    /** Displays the probe report in a scrollable AlertDialog. */
+    private void showProbeReport(final String report) {
+        if (isFinishing() || isDestroyed()) return;
+        final android.widget.ScrollView scrollView = new android.widget.ScrollView(this);
+        final android.widget.TextView tv = new android.widget.TextView(this);
+        tv.setText(report);
+        tv.setPadding(32, 16, 32, 16);
+        tv.setTypeface(android.graphics.Typeface.MONOSPACE);
+        tv.setTextSize(12f);
+        scrollView.addView(tv);
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Probe Report")
+                .setView(scrollView)
+                .setPositiveButton("Close", null)
+                .show();
     }
 
     private ArrayList<String> addressListForPref(final SharedPreferences prefs, final String key) {

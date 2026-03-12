@@ -281,6 +281,7 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
         final int THREAD_ID = 31973;
         TrafficStats.setThreadStatsTag(THREAD_ID);
         workAroundGoogleMapsBug();
+        migratePrefsIfNeeded();
         final SharedPreferences prefs = getSharedPreferences(PreferenceKeys.SHARED_PREFS, Context.MODE_PRIVATE);
 
         ThemeUtil.setTheme(prefs);
@@ -512,6 +513,28 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
      * ALIBI: API (unsupported) will get registered for this in the pre-release reports, but this
      * works around the ZoomTable Array Index OOB bugs. 80% of violations in pre-release report are this.
      */
+    /** TD-23: one-time migration from WiglePrefs → FieldScanPrefs. */
+    private void migratePrefsIfNeeded() {
+        final SharedPreferences newPrefs = getSharedPreferences(PreferenceKeys.SHARED_PREFS, Context.MODE_PRIVATE);
+        if (newPrefs.getBoolean("fieldscan_prefs_migrated", false)) return;
+        final SharedPreferences oldPrefs = getSharedPreferences(PreferenceKeys.SHARED_PREFS_LEGACY, Context.MODE_PRIVATE);
+        if (oldPrefs.getAll().isEmpty()) return;
+        Logging.info("Migrating prefs from WiglePrefs → FieldScanPrefs");
+        final SharedPreferences.Editor editor = newPrefs.edit();
+        for (final java.util.Map.Entry<String, ?> entry : oldPrefs.getAll().entrySet()) {
+            final Object v = entry.getValue();
+            final String k = entry.getKey();
+            if (v instanceof Boolean)  editor.putBoolean(k, (Boolean) v);
+            else if (v instanceof Integer)  editor.putInt(k, (Integer) v);
+            else if (v instanceof Long)     editor.putLong(k, (Long) v);
+            else if (v instanceof Float)    editor.putFloat(k, (Float) v);
+            else if (v instanceof String)   editor.putString(k, (String) v);
+        }
+        editor.putBoolean("fieldscan_prefs_migrated", true);
+        editor.apply();
+        Logging.info("Prefs migration complete: " + oldPrefs.getAll().size() + " keys");
+    }
+
     private void workAroundGoogleMapsBug() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         //DEBUG: Handler handler = new Handler(Looper.getMainLooper());

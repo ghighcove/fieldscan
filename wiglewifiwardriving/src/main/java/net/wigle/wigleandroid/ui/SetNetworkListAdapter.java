@@ -290,8 +290,16 @@ public final class SetNetworkListAdapter extends AbstractListAdapter<Network> {
 
         tv = row.findViewById(R.id.oui);
         final String ouiString = network.getOui(ListFragment.lameStatic.oui);
-        final String sep = ouiString.length() > 0 ? " - " : "";
-        tv.setText(ouiString + sep);
+        // TD-22: prefix with network type for quick visual identification
+        final String typePrefix;
+        switch (network.getType()) {
+            case BLE:  typePrefix = "BLE · ";  break;
+            case BT:   typePrefix = "BT · ";   break;
+            case WIFI: typePrefix = "WiFi · "; break;
+            case GSM: case LTE: case WCDMA: case NR: case CDMA: typePrefix = "Cell · "; break;
+            default:   typePrefix = "";
+        }
+        tv.setText(ouiString.isEmpty() ? typePrefix.trim() : typePrefix + ouiString);
         if (BLE.equals(network.getType())) {
             tv.setTextAppearance(R.style.ListBt);
         } else {

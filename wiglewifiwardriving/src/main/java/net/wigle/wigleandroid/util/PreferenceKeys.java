@@ -2,7 +2,9 @@ package net.wigle.wigleandroid.util;
 
 public class PreferenceKeys {
     // preferences
-    public static final String SHARED_PREFS = "WiglePrefs";
+    public static final String SHARED_PREFS = "FieldScanPrefs";
+    /** Legacy prefs file name — migrated to FieldScanPrefs on first run. */
+    public static final String SHARED_PREFS_LEGACY = "WiglePrefs";
     public static final String PREF_USERNAME = "username";
     public static final String PREF_PASSWORD = "password";
     public static final String PREF_AUTHNAME = "authname";
