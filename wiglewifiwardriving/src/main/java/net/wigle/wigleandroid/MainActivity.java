@@ -2222,6 +2222,9 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
         }
         if (null != state && null != state.wigleService) {
             state.wigleService.setupNotification();
+            if (!isScanning) {
+                state.wigleService.postScanSummaryNotification();
+            }
         }
     }
 

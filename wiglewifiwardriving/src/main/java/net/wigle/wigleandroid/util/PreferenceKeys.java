@@ -80,6 +80,13 @@ public class PreferenceKeys {
     public static final String PREF_SHOW_DISCOVERED = "showMyDiscovered";
     public static final String PREF_MAPS_FOLLOW_DAYNIGHT = "mapThemeMatchDayNight";
     public static final String PREF_MAP_FOLLOW_BEARING = "mapFollowBearing";
+    // TD-13: heatmap toggle
+    public static final String PREF_MAP_HEATMAP = "mapHeatmap";
+    // TD-20: quick-filter toggles (stored in SharedPrefs, applied in FossMapRender.okForMapTab)
+    public static final String PREF_MAP_ONLY_OPEN = "mapOnlyOpen";
+    public static final String PREF_MAP_ONLY_NEW_SESSION = "mapOnlyNewSession";
+    // TD-20: session start timestamp for "new since launch" filter
+    public static final String PREF_MAP_SESSION_START_MS = "mapSessionStartMs";
 
     // what to speak on announcements
     public static final String PREF_SPEECH_PERIOD = "speechPeriod";

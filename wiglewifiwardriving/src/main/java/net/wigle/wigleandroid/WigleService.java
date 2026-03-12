@@ -37,6 +37,8 @@ import static android.os.Build.VERSION.SDK_INT;
 
 public final class WigleService extends Service {
     private static final int NOTIFICATION_ID = 1;
+    private static final int SUMMARY_NOTIFICATION_ID = 2;
+    public static final String SUMMARY_NOTIFICATION_CHANNEL_ID = "fieldscan_summary";
 
     // NOTIFICATION_CHANNEL_ID must be updated for any channel change to take effect on an
     // existing device.
@@ -413,6 +415,53 @@ public final class WigleService extends Service {
             return builder.build();
         }
         return null;
+    }
+
+    /**
+     * Posts a one-shot summary notification when the user stops scanning.
+     * Uses counters already tracked in ListFragment.lameStatic — no new state needed.
+     */
+    public void postScanSummaryNotification() {
+        try {
+            final Context context = getApplicationContext();
+            final NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager == null) return;
+
+            if (SDK_INT >= Build.VERSION_CODES.O) {
+                final NotificationChannel channel = new NotificationChannel(
+                        SUMMARY_NOTIFICATION_CHANNEL_ID,
+                        "FieldScan Session Summary",
+                        NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setSound(null, null);
+                notificationManager.createNotificationChannel(channel);
+            }
+
+            final long runNets = ListFragment.lameStatic.runNets
+                    + ListFragment.lameStatic.runCells
+                    + ListFragment.lameStatic.runBt;
+            final long newNets = ListFragment.lameStatic.newNets;
+
+            final Intent notificationIntent = new Intent(this, MainActivity.class);
+            final int flags = SDK_INT >= Build.VERSION_CODES.S
+                    ? (FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE) : FLAG_UPDATE_CURRENT;
+            final PendingIntent contentIntent =
+                    PendingIntent.getActivity(this, 0, notificationIntent, flags);
+
+            final NotificationCompat.Builder builder =
+                    new NotificationCompat.Builder(context, SUMMARY_NOTIFICATION_CHANNEL_ID)
+                            .setSmallIcon(R.drawable.wiglewifi_small_white)
+                            .setContentTitle("Scan Complete")
+                            .setContentText(runNets + " networks found this session \u2022 "
+                                    + newNets + " new")
+                            .setAutoCancel(true)
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            .setContentIntent(contentIntent);
+
+            notificationManager.notify(SUMMARY_NOTIFICATION_ID, builder.build());
+        } catch (Exception ex) {
+            Logging.error("postScanSummaryNotification error: ", ex);
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.S)

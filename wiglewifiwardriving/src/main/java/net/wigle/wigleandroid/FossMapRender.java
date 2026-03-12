@@ -27,6 +27,9 @@ import org.maplibre.android.annotations.MarkerOptions;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;
 import org.maplibre.android.maps.MapLibreMap;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.FeatureCollection;
+import org.maplibre.geojson.Point;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +50,23 @@ import java.util.regex.Matcher;
  */
 @SuppressWarnings("deprecation")
 public class FossMapRender {
+
+    // TD-11: crypto-aware marker colors
+    /** Open / no encryption */
+    private static final int MARKER_COLOR_OPEN        = 0xFF00E676; // bright green
+    /** WEP (legacy, weak) */
+    private static final int MARKER_COLOR_WEP         = 0xFFFFD700; // yellow
+    /** WPA2, WPA2+WPA3 mixed, or plain WPA */
+    private static final int MARKER_COLOR_WPA2        = 0xFFFF7043; // orange-red
+    /** WPA3-only (SAE present, no WPA2/RSN tag) */
+    private static final int MARKER_COLOR_WPA3        = 0xFFCE93D8; // purple
+    /** Enterprise / EAP */
+    private static final int MARKER_COLOR_ENTERPRISE  = 0xFF29B6F6; // light blue
+    /** Unknown / cell / BT / BLE — reserved for future use if plain-dot mode is added */
+    @SuppressWarnings("unused")
+    private static final int MARKER_COLOR_UNKNOWN     = 0xFF78909C; // blue-gray
+
+    private static final float NETWORK_DOT_DP = 12f;
 
     private static final int CLUSTER_THRESHOLD = 4;   // match MapRender: cluster when size > 4
     private static final int CLUSTER_ALWAYS_AT = 30; // difference from MapRender: always cluster at >= 30
@@ -130,6 +150,20 @@ public class FossMapRender {
                 && !isDbResult;
         if (network.getLatLng() != null && !hideNets) {
             if (!showNewDBOnly || network.isNew()) {
+                // TD-20: "open only" quick-filter
+                if (prefs.getBoolean(PreferenceKeys.PREF_MAP_ONLY_OPEN, false)) {
+                    if (network.getCrypto() != net.wigle.wigleandroid.model.Network.CRYPTO_NONE) {
+                        return false;
+                    }
+                }
+                // TD-20: "new since session start" quick-filter
+                if (prefs.getBoolean(PreferenceKeys.PREF_MAP_ONLY_NEW_SESSION, false)) {
+                    final long sessionStart = prefs.getLong(
+                            PreferenceKeys.PREF_MAP_SESSION_START_MS, 0L);
+                    if (network.getConstructionTime() < sessionStart) {
+                        return false;
+                    }
+                }
                 return FilterMatcher.isOk(
                         ssidMatcher,
                         null,
@@ -530,6 +564,62 @@ public class FossMapRender {
     }
 
     /**
+     * TD-11: Resolve the crypto-aware dot color for a WiFi network.
+     * Priority order: EAP (enterprise) > WPA3-only > WPA2/mixed > WPA > WEP > open.
+     */
+    static int getCryptoMarkerColor(@NonNull final Network network) {
+        final String cap = network.getCapabilities();
+        // Enterprise: any -EAP- suffix (WPA2-EAP, WPA3-EAP, RSN-EAP, etc.)
+        if (cap.contains("-EAP-") || cap.contains("-EAP]")) {
+            return MARKER_COLOR_ENTERPRISE;
+        }
+        switch (network.getCrypto()) {
+            case Network.CRYPTO_WPA3:
+                // WPA3-only if no WPA2/RSN tag is also present
+                if (cap.contains(Network.WPA2_CAP) || cap.contains(Network.RSN_CAP)) {
+                    return MARKER_COLOR_WPA2; // WPA2+WPA3 mixed -> orange-red
+                }
+                return MARKER_COLOR_WPA3;
+            case Network.CRYPTO_WPA2:
+                return MARKER_COLOR_WPA2;
+            case Network.CRYPTO_WPA:
+                return MARKER_COLOR_WPA2; // treat WPA same as WPA2 tier (still encrypted)
+            case Network.CRYPTO_WEP:
+                return MARKER_COLOR_WEP;
+            case Network.CRYPTO_NONE:
+            default:
+                return MARKER_COLOR_OPEN;
+        }
+    }
+
+    /**
+     * TD-11: Draw a small solid-colored circle bitmap to use as a map marker icon.
+     */
+    private Icon makeColoredDotIcon(final int argbColor) {
+        final int sizePx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, NETWORK_DOT_DP,
+                context.getResources().getDisplayMetrics());
+        final Bitmap bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bitmap);
+
+        final Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        fillPaint.setColor(argbColor);
+        fillPaint.setStyle(Paint.Style.FILL);
+
+        final Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        strokePaint.setColor(0x99000000); // semi-transparent black outline for visibility
+        strokePaint.setStyle(Paint.Style.STROKE);
+        strokePaint.setStrokeWidth(sizePx * 0.12f);
+
+        final float r = sizePx * 0.42f;
+        final float cx = sizePx * 0.5f;
+        final float cy = sizePx * 0.5f;
+        canvas.drawCircle(cx, cy, r, fillPaint);
+        canvas.drawCircle(cx, cy, r, strokePaint);
+
+        return mapIconFactory.fromBitmap(bitmap);
+    }
+
+    /**
      * returns the Icon for the network (either a simple pin or a rich label bubble)
      */
     private Icon getIcon(@NonNull final Network network) {
@@ -541,27 +631,28 @@ public class FossMapRender {
 
         labeledNetworks.remove(network);
 
-        final int resId;
         switch (network.getType()) {
             case CDMA:
             case GSM:
             case WCDMA:
             case LTE:
             case NR:
-                resId = R.drawable.ic_cell;
-                break;
+                return mapIconFactory.fromResource(R.drawable.ic_cell);
             case BT:
-                resId = R.drawable.bt_white;
-                break;
+                return mapIconFactory.fromResource(R.drawable.bt_white);
             case BLE:
-                resId = R.drawable.btle_white;
-                break;
+                return mapIconFactory.fromResource(R.drawable.btle_white);
             case WIFI:
+                // TD-11: use crypto-aware colored dot for WiFi markers
+                try {
+                    return makeColoredDotIcon(getCryptoMarkerColor(network));
+                } catch (Exception ex) {
+                    Logging.info("FossMapRender: makeColoredDotIcon failed, using default: " + ex);
+                    return mapIconFactory.fromResource(R.drawable.ic_wifi_sm);
+                }
             default:
-                resId = R.drawable.ic_wifi_sm;
-                break;
+                return mapIconFactory.fromResource(R.drawable.ic_wifi_sm);
         }
-        return mapIconFactory.fromResource(resId);
     }
 
     /**
