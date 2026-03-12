@@ -16,6 +16,8 @@ import net.wigle.wigleandroid.util.PreferenceKeys;
 
 import net.wigle.wigleandroid.util.Logging;
 
+import android.os.Environment;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -107,8 +109,16 @@ public class AutoSyncManager extends BroadcastReceiver {
 
     private static void syncFiles(final Context context, final SharedPreferences prefs,
                                   final String serverIp, final int port) {
-        final File exportDir = context.getExternalFilesDir(null);
-        if (exportDir == null || !exportDir.exists()) return;
+        // Match FileUtility.getUploadFilePath(): Android 11+ uses internal filesDir, older uses /sdcard/wiglewifi/
+        final File exportDir;
+        try {
+            exportDir = new File(net.wigle.wigleandroid.util.FileUtility.getUploadFilePath(context));
+        } catch (Exception e) {
+            Logging.error("AutoSync: could not resolve export dir: ", e);
+            return;
+        }
+        Logging.info("AutoSync: scanning " + exportDir.getAbsolutePath());
+        if (!exportDir.exists()) return;
 
         final File[] csvFiles = exportDir.listFiles(
                 f -> f.isFile() && (f.getName().endsWith(".csv") || f.getName().endsWith(".csv.gz")));

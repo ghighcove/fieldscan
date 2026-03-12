@@ -383,6 +383,27 @@ public class ObservationUploader extends AbstractProgressApiRequest {
     }
 
     /**
+     * FieldScan: write CSV.gz to disk silently — no share sheet, no handler message.
+     * Calls listener.requestComplete() when done so callers can chain sync.
+     * Run on a background thread (does not call start()).
+     */
+    public void runSilentExport() {
+        final CountStats countStats = new CountStats();
+        final Bundle bundle = new Bundle();
+        try (OutputStream fos = FileAccess.getOutputStream(context, bundle, new Object[2])) {
+            writeFile(fos, bundle, countStats);
+        } catch (final InterruptedException ex) {
+            Logging.info("silentExport interrupted: " + ex);
+        } catch (final Exception ex) {
+            Logging.error("silentExport error: " + ex, ex);
+        } finally {
+            if (listener != null) {
+                try { listener.requestComplete(null, false); } catch (Exception ignored) {}
+            }
+        }
+    }
+
+    /**
      * (directly lifted from FileUploadTask)
      */
     private long writeFile( final OutputStream fos, final Bundle bundle,

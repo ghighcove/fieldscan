@@ -820,12 +820,16 @@ public final class ListFragment extends Fragment implements ApiListener, DialogL
             }
 
             button.setOnClickListener(view1 -> {
-                // FieldScan: sync to PC
+                // FieldScan: silent export then sync to PC — no share sheet, no dialog
                 final android.content.Context ctx = getContext();
-                if (ctx != null) {
-                    android.widget.Toast.makeText(ctx, "Syncing to PC…", android.widget.Toast.LENGTH_SHORT).show();
-                    AutoSyncManager.manualSync(ctx);
-                }
+                if (ctx == null) return;
+                android.widget.Toast.makeText(ctx, "Syncing to PC…", android.widget.Toast.LENGTH_SHORT).show();
+                final android.content.Context appCtx = ctx.getApplicationContext();
+                new Thread(() -> net.wigle.wigleandroid.background.SilentExporter.exportAndThen(
+                        appCtx,
+                        ListFragment.lameStatic.dbHelper,
+                        () -> AutoSyncManager.manualSync(appCtx)
+                )).start();
             });
         }
     }

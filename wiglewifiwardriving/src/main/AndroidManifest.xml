@@ -76,6 +76,7 @@
         android:theme="@style/Theme.AppCompat.DayNight"
         android:enableOnBackInvokedCallback="true"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
