@@ -48,6 +48,7 @@ public class AutoSyncManager extends BroadcastReceiver {
     public static final String PREF_SERVER_IP   = "fieldscan_server_ip";
     public static final String PREF_SERVER_PORT = "fieldscan_server_port";
     public static final String PREF_AUTO_SYNC   = "fieldscan_auto_sync";
+    static final String API_KEY = "fe921262089ddb97dfe0e56e1a8ca065";
     private static final String PREF_SYNCED_PREFIX = "fieldscan_synced_";
 
     private static final String NOTIFICATION_CHANNEL_ID = "fieldscan_sync";
@@ -156,6 +157,7 @@ public class AutoSyncManager extends BroadcastReceiver {
             final URL url = new URL("http://" + serverIp + ":" + port + "/config");
             final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            conn.setRequestProperty("X-FieldScan-Key", API_KEY);
             conn.setConnectTimeout(8_000);
             conn.setReadTimeout(15_000);
             final int code = conn.getResponseCode();
@@ -195,6 +197,7 @@ public class AutoSyncManager extends BroadcastReceiver {
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        conn.setRequestProperty("X-FieldScan-Key", API_KEY);
         conn.setConnectTimeout(10_000);
         conn.setReadTimeout(30_000);
 
