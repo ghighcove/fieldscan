@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/windowBackground">
+
+    <!-- Class tab strip (horizontal radio group) -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="false"
+        android:scrollbars="none"
+        android:background="#1a1a1a">
+
+        <RadioGroup
+            android:id="@+id/class_tab_group"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp">
+
+            <RadioButton
+                android:id="@+id/tab_all"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="All"
+                android:checked="true"
+                android:button="@null"
+                android:background="@drawable/tab_selector"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="@color/tab_text_selector"/>
+
+            <RadioButton
+                android:id="@+id/tab_medical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Medical"
+                android:button="@null"
+                android:background="@drawable/tab_selector"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="@color/tab_text_selector"/>
+
+            <RadioButton
+                android:id="@+id/tab_car"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Car"
+                android:button="@null"
+                android:background="@drawable/tab_selector"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="@color/tab_text_selector"/>
+
+            <RadioButton
+                android:id="@+id/tab_accessories"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Accessories"
+                android:button="@null"
+                android:background="@drawable/tab_selector"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="@color/tab_text_selector"/>
+
+            <RadioButton
+                android:id="@+id/tab_family"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Family"
+                android:button="@null"
+                android:background="@drawable/tab_selector"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="@color/tab_text_selector"/>
+
+            <RadioButton
+                android:id="@+id/tab_open"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Open WiFi"
+                android:button="@null"
+                android:background="@drawable/tab_selector"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="@color/tab_text_selector"/>
+
+            <RadioButton
+                android:id="@+id/tab_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Phone"
+                android:button="@null"
+                android:background="@drawable/tab_selector"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="@color/tab_text_selector"/>
+
+        </RadioGroup>
+    </HorizontalScrollView>
+
+    <!-- Device count line -->
+    <TextView
+        android:id="@+id/classes_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:textSize="11sp"
+        android:textColor="#888888"
+        android:text="0 devices"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#333333"/>
+
+    <!-- Device list -->
+    <ListView
+        android:id="@+id/classes_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="#222222"
+        android:dividerHeight="1dp"
+        android:scrollbars="vertical"/>
+
+</LinearLayout>

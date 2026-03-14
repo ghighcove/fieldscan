@@ -51,6 +51,9 @@ import java.util.regex.Matcher;
 @SuppressWarnings("deprecation")
 public class FossMapRender {
 
+    /** When true, all markers use DeviceClassifier class color instead of auth color. */
+    public static volatile boolean classColorMode = false;
+
     // TD-11: crypto-aware marker colors
     /** Open / no encryption */
     private static final int MARKER_COLOR_OPEN        = 0xFF00E676; // bright green
@@ -630,6 +633,16 @@ public class FossMapRender {
         }
 
         labeledNetworks.remove(network);
+
+        // Class-color mode: override all marker colors by device class
+        if (classColorMode) {
+            try {
+                final DeviceClassifier.DeviceClass cls = DeviceClassifier.classify(network);
+                return makeColoredDotIcon(DeviceClassifier.colorForClass(cls));
+            } catch (Exception ex) {
+                Logging.info("FossMapRender: class-color icon failed, using default: " + ex);
+            }
+        }
 
         switch (network.getType()) {
             case CDMA:

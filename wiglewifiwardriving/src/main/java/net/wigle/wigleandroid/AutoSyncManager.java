@@ -140,7 +140,52 @@ public class AutoSyncManager extends BroadcastReceiver {
             }
         }
 
-        if (!synced.isEmpty()) showNotification(context, synced.size(), failed.size());
+        if (!synced.isEmpty()) {
+            showNotification(context, synced.size(), failed.size());
+            // Pull updated classifier config (familynames etc.) from PC after successful upload
+            fetchConfig(context, serverIp, port);
+        }
+    }
+
+    /**
+     * GETs /config from receiver.py and saves fieldscan_config.json to app filesDir.
+     * Runs on the existing sync executor thread — no separate threading needed.
+     */
+    private static void fetchConfig(final Context context, final String serverIp, final int port) {
+        try {
+            final URL url = new URL("http://" + serverIp + ":" + port + "/config");
+            final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(8_000);
+            conn.setReadTimeout(15_000);
+            final int code = conn.getResponseCode();
+            if (code != 200) {
+                Logging.info("AutoSync: /config returned HTTP " + code + " — skipping");
+                conn.disconnect();
+                return;
+            }
+            final java.io.ByteArrayOutputStream buf = new java.io.ByteArrayOutputStream();
+            try (InputStream in = conn.getInputStream()) {
+                final byte[] chunk = new byte[8192];
+                int n;
+                while ((n = in.read(chunk)) != -1) buf.write(chunk, 0, n);
+            }
+            final byte[] body = buf.toByteArray();
+            conn.disconnect();
+            // Write to app-private storage
+            final java.io.File configFile = new java.io.File(
+                    context.getFilesDir(), DeviceClassifier.CONFIG_FILENAME);
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(configFile)) {
+                fos.write(body);
+            }
+            // Record timestamp in prefs so classifier knows when it was last synced
+            context.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0)
+                    .edit().putLong("fieldscan_config_timestamp",
+                            System.currentTimeMillis()).apply();
+            Logging.info("AutoSync: config fetched (" + body.length + " B) → " + configFile);
+        } catch (Exception e) {
+            Logging.error("AutoSync: fetchConfig failed: ", e);
+        }
     }
 
     private static void uploadFile(final File file, final String serverIp, final int port) throws Exception {

@@ -87,6 +87,8 @@ public class PreferenceKeys {
     public static final String PREF_MAP_ONLY_NEW_SESSION = "mapOnlyNewSession";
     // TD-20: session start timestamp for "new since launch" filter
     public static final String PREF_MAP_SESSION_START_MS = "mapSessionStartMs";
+    // Class-color map overlay toggle
+    public static final String PREF_MAP_CLASS_COLOR = "mapClassColor";
 
     // what to speak on announcements
     public static final String PREF_SPEECH_PERIOD = "speechPeriod";

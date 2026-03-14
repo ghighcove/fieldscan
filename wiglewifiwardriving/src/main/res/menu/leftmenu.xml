@@ -35,6 +35,12 @@
             android:contentDescription="@string/tab_search"
             />
         <item
+            android:id="@+id/nav_classes"
+            android:icon="@android:drawable/ic_menu_myplaces"
+            android:title="@string/tab_classes"
+            android:contentDescription="@string/tab_classes"
+            />
+        <item
             android:id="@+id/nav_news"
             android:icon="@android:drawable/ic_menu_agenda"
             android:title="@string/tab_news"

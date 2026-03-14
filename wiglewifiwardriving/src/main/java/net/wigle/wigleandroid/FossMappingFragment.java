@@ -150,6 +150,7 @@ public class FossMappingFragment extends AbstractMappingFragment {
         });
         setupCenterLocationButton(view);
         setupHeatmapToggleButton(view);    // TD-13
+        setupClassColorToggleButton(view); // Class-color mode
         setupFilterChips(view, prefs);     // TD-20
     }
 
@@ -431,6 +432,36 @@ public class FossMappingFragment extends AbstractMappingFragment {
                     refreshHeatmap();
                 }
             });
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // Class-color map overlay toggle
+    // -----------------------------------------------------------------------
+
+    private void setupClassColorToggleButton(final View view) {
+        final ImageButton btn = view.findViewById(R.id.class_color_toggle_button);
+        if (btn == null) return;
+        final Activity a = getActivity();
+        if (a != null) {
+            FossMapRender.classColorMode = a.getSharedPreferences(
+                    PreferenceKeys.SHARED_PREFS, 0)
+                    .getBoolean(PreferenceKeys.PREF_MAP_CLASS_COLOR, false);
+            btn.setAlpha(FossMapRender.classColorMode ? 1.0f : 0.5f);
+        }
+        btn.setOnClickListener(v -> {
+            FossMapRender.classColorMode = !FossMapRender.classColorMode;
+            btn.setAlpha(FossMapRender.classColorMode ? 1.0f : 0.5f);
+            final Activity act = getActivity();
+            if (act != null) {
+                act.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0).edit()
+                        .putBoolean(PreferenceKeys.PREF_MAP_CLASS_COLOR, FossMapRender.classColorMode)
+                        .apply();
+            }
+            // Load classifier config if not yet loaded
+            if (FossMapRender.classColorMode && act != null) {
+                DeviceClassifier.loadSyncedConfig(act);
+            }
         });
     }
 

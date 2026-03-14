@@ -828,6 +828,7 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
             applyExitBackground(navigationView);
         }
         final Map<Integer, String> fragmentTitles = new HashMap<>();
+        fragmentTitles.put(R.id.nav_classes, getString(R.string.classes_app_name));
         fragmentTitles.put(R.id.nav_list, getString(R.string.mapping_app_name));
         fragmentTitles.put(R.id.nav_dash, getString(R.string.dashboard_app_name));
         fragmentTitles.put(R.id.nav_data, getString(R.string.data_activity_name));
@@ -895,7 +896,9 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
     }
 
     private static Class classForFragmentNavId(final int navId) {
-        if (navId == R.id.nav_list) {
+        if (navId == R.id.nav_classes) {
+            return ClassesFragment.class;
+        } else if (navId == R.id.nav_list) {
             return ListFragment.class;
         } else if (navId == R.id.nav_dash) {
             return DashboardFragment.class;

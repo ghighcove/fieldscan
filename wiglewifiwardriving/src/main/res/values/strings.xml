@@ -112,6 +112,14 @@
     <string name="on">On</string>
     <string name="nonstop">Nonstop</string>
     <string name="tab_list">Network List</string>
+    <string name="tab_classes">Classes</string>
+    <string name="tab_finder">Finder</string>
+    <string name="classes_app_name">FieldScan – Classes</string>
+    <string name="finder_app_name">FieldScan – Finder</string>
+    <string name="finder_earbud_title">Accessory Finder</string>
+    <string name="finder_earbud_subtitle">All nearby earbuds and accessories, ranked by signal strength</string>
+    <string name="finder_waiting">Waiting for signal…</string>
+    <string name="class_color_toggle">Toggle class color mode</string>
     <string name="tab_map">Map</string>
     <string name="tab_dash">Dashboard</string>
     <string name="tab_data">Database</string>
