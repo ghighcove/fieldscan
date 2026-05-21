@@ -1,10 +1,11 @@
 {
   "project_name": "fieldscan",
-  "updated_at": "2026-05-20T12:00:07Z",
+  "updated_at": "2026-05-21T12:00:09Z",
   "uptime_days": 1,
   "outputs_last_7d": 0,
   "last_meaningful_output": "2026-03-26T03:33:08Z",
   "owner_sessions_last_14d": 0,
+  "cli_invocations": 0,
   "auto_value_score": 0.0,
   "spawn_depth": 1,
   "spawned_for": "FieldScan: Fork of WiGLE WiFi scanner with auto-sync to PC and custom themes",
